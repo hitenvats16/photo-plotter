@@ -556,7 +556,6 @@ function TerrainMesh({
     const uv = geom.attributes.uv as THREE.BufferAttribute;
     const colorArray = new Float32Array((pos.count) * 3);
     const vertex = new THREE.Vector3();
-    const normal = new THREE.Vector3();
     const dispScale = heightScale; // already normalized by caller
     for (let i = 0; i < pos.count; i += 1) {
       const u = uv.getX(i);
@@ -618,21 +617,14 @@ function TerrainMesh({
 function ControlsPanel() {
   const {
     heightScale,
-    setHeightScale,
     heightMode,
-    setHeightMode,
     wireframe,
-    setWireframe,
     viewPreset,
     setViewPreset,
     shading,
-    setShading,
     seaLevel,
-    setSeaLevel,
     showContours,
-    setShowContours,
     contourSteps,
-    setContourSteps,
     sunAzimuth,
     setSunAzimuth,
     sunElevation,
@@ -908,9 +900,8 @@ function computeOrbitPosition(t: number, b: Body): THREE.Vector3 {
 
 function Scene() {
   const {
-    imageUrl, heightScale, heightMode, wireframe, viewPreset, shading, seaLevel,
-    showContours, contourSteps, sunAzimuth, sunElevation, screenshotToken, setProbeInfo, aspectY, showSea,
-    starCount, starRadius, starDepth, starSpeed, starColor
+    imageUrl, heightScale, viewPreset, sunAzimuth, sunElevation, screenshotToken, setProbeInfo,
+    starCount, starRadius, starDepth, starSpeed
   } = useAppState();
   const { gl } = useThree();
 
@@ -975,7 +966,7 @@ function Scene() {
       <group>
         {/* Render bodies: first central at origin, others orbiting */}
         {useAppState.getState().bodies.map((b) => (
-          <BodyInstance key={b.id} body={b} globalControls={{ heightMode, wireframe, shading, seaLevel, showContours, contourSteps }} onProbe={setProbeInfo} />
+          <BodyInstance key={b.id} body={b} onProbe={setProbeInfo} />
         ))}
       </group>
       <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
@@ -999,11 +990,11 @@ function Scene() {
   );
 }
 
-function BodyInstance({ body, globalControls, onProbe }: { body: Body; globalControls: { heightMode: HeightMappingMode; wireframe: boolean; shading: ShadingMode; seaLevel: number; showContours: boolean; contourSteps: number; }; onProbe: (info: { show: boolean; x: number; y: number; height: number }) => void; }) {
+function BodyInstance({ body, onProbe }: { body: Body; onProbe: (info: { show: boolean; x: number; y: number; height: number }) => void; }) {
   const groupRef = React.useRef<THREE.Group>(null);
   const tRef = React.useRef(0);
   const [trailPoints, setTrailPoints] = React.useState<THREE.Vector3[]>([]);
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (!groupRef.current) return;
     tRef.current += delta;
     if (!body.isCentral && body.orbitEnabled) {
