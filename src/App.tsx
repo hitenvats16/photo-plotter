@@ -5,6 +5,7 @@ import { create } from 'zustand'
 import * as THREE from 'three'
 import * as UTIF from 'utif'
 import { EffectComposer, SSAO } from '@react-three/postprocessing'
+import ReactGA from 'react-ga4'
 import './App.css'
 
 // Image/geometry safety caps
@@ -1045,6 +1046,12 @@ function BodyInstance({ body, onProbe }: { body: Body; onProbe: (info: { show: b
 }
 
 function App() {
+  // Initialize Google Analytics
+  useEffect(() => {
+    ReactGA.initialize('G-CFPDBFG3K9');
+    ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
+  }, []);
+
   const { imageUrl, probeInfo, bodies, activeBodyId, addBody, removeActiveBody, selectBody, updateActiveBody } = useAppState();
 
   return (
